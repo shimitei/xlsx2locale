@@ -1,9 +1,10 @@
 package com.hinohunomi.xlsx2locale;
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -62,11 +63,12 @@ public class Main {
             }
         }
 
-		String dirpath = "locale/" + localeName;
-		File dir = new File(dirpath);
-		dir.mkdir();
-		File file = new File(dirpath + "/resources.properties");
-		save(list, file);
+		Path dirpath = Paths.get("locale", localeName);
+		if (!Files.exists(dirpath)) {
+			Files.createDirectory(dirpath);
+		}
+		Path path = dirpath.resolve("resources.properties");
+		save(list, path);
 	}
 
 	static String getCellString(Row row, int cellNum) {
@@ -85,17 +87,9 @@ public class Main {
 		return cell.getStringCellValue();
 	}
 
-	static void save(List<String> list, File file) throws IOException {
-		if (file.exists()) file.delete();
+	static void save(List<String> list, Path path) throws IOException {
+		Files.deleteIfExists(path);
 
-		try (BufferedWriter bw = new BufferedWriter(new FileWriter(file))) {
-			for (String line : list) {
-				bw.write(line);
-				bw.newLine();
-			}
-		} catch (Exception e) {
-            e.printStackTrace();
-            throw e;
-		}
+		Files.write(path, list);
 	}
 }
